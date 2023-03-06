@@ -23,6 +23,24 @@ type AbstractAPI struct {
 	AbstractApiTokenEnv string `envconfig:"ABSTRACT_API_TOKEN_ENV"`
 }
 
+func Get() (*Config, error) {
+	CfgTG, err := ReadConfigTG("env/telegramBot.env")
+	if err != nil {
+		log.Fatalf("can't read config from file, error: %w", err)
+		return nil, err
+	}
+	CfgAbstract, err := ReadConfigAbstractAPI("/home/shevchenko/GolandProjects/education/task2.3.3/env/abstractAPI.env")
+	if err != nil {
+		log.Fatalf("can't read config from file, error: %v", err)
+		return nil, err
+	}
+	cfg := &Config{
+		Telegram:    *CfgTG,
+		AbstractAPI: *CfgAbstract,
+	}
+	return cfg, nil
+}
+
 func ReadConfigTG(pathToEnv string) (*Telegram, error) {
 	if err := godotenv.Load(pathToEnv); err != nil {
 		return nil, fmt.Errorf("error parsing config: %w", err)
@@ -46,23 +64,4 @@ func ReadConfigAbstractAPI(pathToEnv string) (*AbstractAPI, error) {
 		return nil, fmt.Errorf("error process config: %w", err)
 	}
 	return c, nil
-}
-
-func Get() (*Config, error) {
-	CfgTG, err := ReadConfigTG("env/telegramBot.env")
-	if err != nil {
-		log.Fatalf("can't read config from file, error: %w", err)
-		return nil, err
-	}
-	CfgAbstract, err := ReadConfigAbstractAPI("/home/shevchenko/GolandProjects/education/task2.3.3/env/abstractAPI.env")
-	if err != nil {
-		log.Fatalf("can't read config from file, error: %v", err)
-		return nil, err
-	}
-	cfg := &Config{
-		Telegram:    *CfgTG,
-		AbstractAPI: *CfgAbstract,
-	}
-	return cfg, nil
-
 }
