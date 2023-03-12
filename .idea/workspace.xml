@@ -5,13 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4de8ee8b-b06d-48af-b700-243545e6c001" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/telegram/callback.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/telegram/callback.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/telegram/commands.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/telegram/commands.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/telegram/hander.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/telegram/hander.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/telegram/holiday.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/telegram/holiday.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/telegram/telegram.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/telegram/telegram.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,16 +108,5 @@
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/internal/telegram/holiday.go</url>
-          <line>102</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
