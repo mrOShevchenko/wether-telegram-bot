@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"context"
-	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pkg/errors"
 	"net/http"
@@ -11,31 +10,35 @@ import (
 	"time"
 )
 
-type telegramBot struct {
+type TgClient interface {
+	Request(c tgbotapi.Chattable) (*tgbotapi.APIResponse, error)
+	Send(chattable tgbotapi.Chattable) (tgbotapi.Message, error)
+	GetUpdatesChan(config tgbotapi.UpdateConfig) tgbotapi.UpdatesChannel
+}
+
+type TelegramBot struct {
 	c           internal.Container
-	bot         *tgbotapi.BotAPI
+	bot         TgClient
 	updatesCh   tgbotapi.UpdatesChannel
 	ctx         context.Context
 	HolidayData *HolidayData
 }
 
-func (tg *telegramBot) Running() {
+func (tg *TelegramBot) Running() {
 	for update := range tg.updatesCh {
-		tg.eventUpdates(update)
+		tg.EventUpdates(update)
 	}
 }
 
-func (tg *telegramBot) eventUpdates(update tgbotapi.Update) {
+func (tg *TelegramBot) EventUpdates(update tgbotapi.Update) {
 	log := tg.c.NewLogger()
 	switch {
 	case update.CallbackQuery != nil:
-		fmt.Printf("\n\n\ncase update.CallbackQuery DATA: %v\n\n\n", update.CallbackQuery.Data)
-		if err := tg.onCallbackQuery(update.CallbackQuery); err != nil {
+		if err := tg.OnCallbackQuery(update.CallbackQuery); err != nil {
 			log.Errorf("error in callback: %v", err)
 		}
 	case update.Message != nil:
-		fmt.Printf("\n\n\ncase update.Message: %v\n\n\n", update.Message)
-		if err := tg.onCommandCreate(update.Message); err != nil {
+		if err := tg.OnCommandCreate(update.Message); err != nil {
 			log.Errorf("error woth command : %v", err)
 		}
 	default:
@@ -43,7 +46,7 @@ func (tg *telegramBot) eventUpdates(update tgbotapi.Update) {
 	}
 }
 
-func New(c internal.Container) (*telegramBot, error) {
+func New(c internal.Container) (*TelegramBot, error) {
 	log := c.NewLogger()
 	cfg := c.NewConfig()
 
@@ -53,16 +56,12 @@ func New(c internal.Container) (*telegramBot, error) {
 	}
 
 	actualHolidays := newHoliday()
-	t := &telegramBot{
+	t := &TelegramBot{
 		c:           c,
 		bot:         bot,
 		HolidayData: actualHolidays,
 	}
-	actualHolidays, err = t.holidayRequest()
-	if err != nil {
-		return nil, errors.Wrapf(err, "error in actualHoliday - holidayRequest %w")
-	}
-	fmt.Printf("\n/\n/\nactualHolidays in new Bot : %s\n/\n/\n", actualHolidays)
+
 	botUpdate := tgbotapi.NewUpdate(0)
 	botUpdate.Timeout = 60
 	t.updatesCh = t.bot.GetUpdatesChan(botUpdate)

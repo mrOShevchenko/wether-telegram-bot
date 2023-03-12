@@ -74,16 +74,16 @@ func newHoliday() *HolidayData {
 	return defaultHolidays
 }
 
-func (tg *telegramBot) holidayRequest() (*HolidayData, error) {
+func (tg *TelegramBot) HolidayRequest() (*HolidayData, error) {
 	cfg := tg.c.NewConfig()
 	countries := []string{"AU", "UA", "CN", "CA", "GE", "FR"}
 	countryMap := make(map[string]CountryData)
 
 	for _, country := range countries {
 		time.Sleep(time.Second * 1)
-		holiday, err := updateHolidays(cfg, country)
+		holiday, err := UpdateHolidays(cfg, country)
 		if err != nil {
-			return nil, errors.Wrapf(err, "can't updateHolidays %+v")
+			return nil, errors.Wrapf(err, "can't UpdateHolidays %+v")
 		}
 		countryMap[country] = *holiday
 	}
@@ -100,11 +100,9 @@ func (tg *telegramBot) holidayRequest() (*HolidayData, error) {
 	return holidayData, nil
 }
 
-func updateHolidays(cfg *config.Config, country string) (*CountryData, error) {
+func UpdateHolidays(cfg *config.Config, country string) (*CountryData, error) {
 	url := fmt.Sprintf("%vapi_key=%vcountry=%s&year=%d&month=%d&day=%d", cfg.AbstractApiBaseUrl,
 		cfg.AbstractApiTokenEnv, country, time.Now().Year(), time.Now().Month(), time.Now().Day())
-	fmt.Printf("\n url %v \n", url)
-
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't get response from url, %+w")
@@ -125,45 +123,43 @@ func updateHolidays(cfg *config.Config, country string) (*CountryData, error) {
 	if len(countryDataResp) == 0 {
 		return &CountryData{Name: "Not any holiday today"}, nil
 	}
-	fmt.Printf("\n\n countryDataResp : %v \n\n", countryDataResp)
 	cdResp := countryDataResp[0]
 	cdResp.Country = country
-	cdResp.Location = resp.Header.Get("Location")
 
 	return &cdResp, nil
 
 }
 
-func (tg *telegramBot) holidayRequestforCountry(country string) (string, error) {
-	cfg := tg.c.NewConfig()
-
-	url := fmt.Sprintf("%vapi_key=%vcountry=%s&year=%d&month=%d&day=%d", cfg.AbstractApiBaseUrl,
-		cfg.AbstractApiTokenEnv, country, time.Now().Year(), time.Now().Month(), time.Now().Day())
-	fmt.Printf("\n url %v \n", url)
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return "", errors.Wrapf(err, "error with Get response %+w")
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", errors.Wrapf(err, "error in ReadAll %+w")
-	}
-	var countryValue []CountryData
-	err = json.Unmarshal(body, &countryValue)
-	if err != nil {
-		return "", errors.Wrapf(err, "cann't Unmrashul %+w")
-	}
-
-	holidayName := "Not any holiday today :("
-
-	if len(countryValue) > 0 {
-		c := countryValue[0]
-		holidayName = c.Name
-		return holidayName, nil
-	}
-	return holidayName, nil
-
-}
+// не смог внедрить, что бы по запросу обновляло только одну страну, а не заранее подготовленное обновление, во время команды Старта
+//func (tg *TelegramBot) HolidayRequestforCountry(country string) (string, error) {
+//	cfg := tg.c.NewConfig()
+//
+//	url := fmt.Sprintf("%vapi_key=%vcountry=%s&year=%d&month=%d&day=%d", cfg.AbstractApiBaseUrl,
+//		cfg.AbstractApiTokenEnv, country, time.Now().Year(), time.Now().Month(), time.Now().Day())
+//
+//	resp, err := http.Get(url)
+//	if err != nil {
+//		return "", errors.Wrapf(err, "error with Get response %+w")
+//	}
+//	defer resp.Body.Close()
+//
+//	body, err := io.ReadAll(resp.Body)
+//	if err != nil {
+//		return "", errors.Wrapf(err, "error in ReadAll %+w")
+//	}
+//	var countryValue []CountryData
+//	err = json.Unmarshal(body, &countryValue)
+//	if err != nil {
+//		return "", errors.Wrapf(err, "cann't Unmrashul %+w")
+//	}
+//
+//	holidayName := "Not any holiday today :("
+//
+//	if len(countryValue) > 0 {
+//		c := countryValue[0]
+//		holidayName = c.Name
+//		return holidayName, nil
+//	}
+//	return holidayName, nil
+//
+//}
