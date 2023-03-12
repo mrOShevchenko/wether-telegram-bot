@@ -3,23 +3,26 @@ package main
 import (
 	"context"
 	"log"
-	"task2.3.3/internal/config"
-	"task2.3.3/internal/logger"
+	"task2.3.3/internal"
+	"task2.3.3/internal/telegram"
 )
 
+//TODO: url - разобраться почему не обновляется страна (дата и все остальное - отлично)
+//TODO: дописать телеграм клиент интерфейсами
+//
+//TODO: поставить отарпвку сообщений в чат, при ответе, а не только принт
+
 func main() {
-	cfg, err := config.Get()
-	if err != nil {
-		log.Fatalf("error with getting config : %v", err)
-	}
-
 	ctx := context.Background()
-
-	log, err := logger.Get()
+	container, err := internal.NewContainer()
 	if err != nil {
-		log.Errorf("error in logger.Get: %v", err)
+		log.Fatal(err)
 	}
-
-	ctx = context.WithValue(ctx, "log", log)
+	ctx = context.WithValue(ctx, "log", container.NewLogger())
+	tg, err := telegram.New(container)
+	if err != nil {
+		log.Fatalf("error in creating new tgBot: %v", err)
+	}
+	tg.Running()
 
 }

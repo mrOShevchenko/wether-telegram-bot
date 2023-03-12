@@ -11,6 +11,7 @@ func (tg *telegramBot) onCommandCreate(message *tgbotapi.Message) error {
 		if err := tg.printMessage(message, commandStartMessage); err != nil {
 			return errors.Wrap(err, "error with case /start ")
 		}
+
 	default:
 		if err := tg.printMessage(message, greetingMessage); err != nil {
 			return errors.Wrap(err, "can't print greetingMessage")
@@ -20,6 +21,7 @@ func (tg *telegramBot) onCommandCreate(message *tgbotapi.Message) error {
 }
 
 func (tg *telegramBot) onCallbackQuery(callback *tgbotapi.CallbackQuery) error {
+	//fmt.Printf("\n----\n callback in inCallBackQuery : %s \n----\n", callback)
 	if err := tg.callbackRequest(callback); err != nil {
 		return errors.Wrap(err, "error in onCallbackQuery: ")
 	}

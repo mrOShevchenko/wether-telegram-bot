@@ -2,12 +2,12 @@ package telegram
 
 import (
 	"context"
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pkg/errors"
 	"net/http"
 	"task2.3.3/internal"
 	"task2.3.3/internal/config"
-	"task2.3.3/internal/holiday"
 	"time"
 )
 
@@ -16,7 +16,7 @@ type telegramBot struct {
 	bot         *tgbotapi.BotAPI
 	updatesCh   tgbotapi.UpdatesChannel
 	ctx         context.Context
-	holidayData *holiday.HolidayData
+	HolidayData *HolidayData
 }
 
 func (tg *telegramBot) Running() {
@@ -29,15 +29,17 @@ func (tg *telegramBot) eventUpdates(update tgbotapi.Update) {
 	log := tg.c.NewLogger()
 	switch {
 	case update.CallbackQuery != nil:
-		if err := tg.OnCallbackQuery(update.CallbackQuery); err != nil {
+		fmt.Printf("\n\n\ncase update.CallbackQuery DATA: %v\n\n\n", update.CallbackQuery.Data)
+		if err := tg.onCallbackQuery(update.CallbackQuery); err != nil {
 			log.Errorf("error in callback: %v", err)
 		}
 	case update.Message != nil:
+		fmt.Printf("\n\n\ncase update.Message: %v\n\n\n", update.Message)
 		if err := tg.onCommandCreate(update.Message); err != nil {
 			log.Errorf("error woth command : %v", err)
 		}
 	default:
-		log.Infof("unkwonw event: %+v\n", update)
+		log.Infof("unkwown event: %+v\n", update)
 	}
 }
 
@@ -50,12 +52,17 @@ func New(c internal.Container) (*telegramBot, error) {
 		return nil, errors.Wrap(err, "can't create new Bot")
 	}
 
+	actualHolidays := newHoliday()
 	t := &telegramBot{
 		c:           c,
 		bot:         bot,
-		holidayData: newHolidayUpdate,
+		HolidayData: actualHolidays,
 	}
-
+	actualHolidays, err = t.holidayRequest()
+	if err != nil {
+		return nil, errors.Wrapf(err, "error in actualHoliday - holidayRequest %w")
+	}
+	fmt.Printf("\n/\n/\nactualHolidays in new Bot : %s\n/\n/\n", actualHolidays)
 	botUpdate := tgbotapi.NewUpdate(0)
 	botUpdate.Timeout = 60
 	t.updatesCh = t.bot.GetUpdatesChan(botUpdate)
